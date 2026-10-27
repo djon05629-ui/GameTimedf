@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Устройство{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'manage_equipment' %}">← К списку</a>
+<h1>{% if instance %}Изменить: {{ instance.name }}{% else %}Новое устройство{% endif %}</h1>
+<form method="post" class="panel narrow" novalidate>{% csrf_token %}
+  {% include "partials/_form.html" %}
+  <p class="muted small">Изменение тарифа не затронет уже созданные брони — в них сохранён прежний тариф.</p>
+  <button class="btn">Сохранить</button>
+</form>
+{% endblock %}

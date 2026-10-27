@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Не найдено{% endblock %}
+{% block content %}
+<div class="empty big-empty"><p class="code">404</p><h1>Страница не найдена</h1><p>Возможно, ссылка устарела или устройство удалено из каталога.</p><a class="btn" href="{% url 'catalog' %}">Открыть каталог</a></div>
+{% endblock %}

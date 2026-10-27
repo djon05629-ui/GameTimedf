@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Нет доступа{% endblock %}
+{% block content %}
+<div class="empty big-empty"><p class="code">403</p><h1>Нет доступа</h1><p>У вашей роли нет прав на это действие. Если вы считаете, что это ошибка, обратитесь к администратору клуба.</p><a class="btn" href="{% url 'home' %}">На главную</a></div>
+{% endblock %}

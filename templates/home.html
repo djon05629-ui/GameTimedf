@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Игровой клуб{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <h1>Место за мощным ПК или консолью — на ваш час</h1>
+    <p class="lead">Выберите устройство, отметьте свободные получасовые слоты и сразу увидите итоговую стоимость. Без звонков и очередей на входе.</p>
+    <div class="row">
+      <a class="btn" href="{% url 'catalog' %}">Выбрать устройство</a>
+      {% if not user.is_authenticated %}<a class="btn btn-ghost" href="{% url 'register' %}">Создать аккаунт</a>{% endif %}
+    </div>
+  </div>
+  <div class="hero-strip" aria-hidden="true">
+    <div class="strip-title">Расписание устройства на вечер</div>
+    <div class="slots demo">
+      <i class="s busy"></i><i class="s busy"></i><i class="s free"></i><i class="s free"></i><i class="s free"></i><i class="s pick"></i><i class="s pick"></i><i class="s pick"></i><i class="s busy"></i><i class="s busy"></i><i class="s busy"></i><i class="s free"></i><i class="s free"></i><i class="s free"></i>
+    </div>
+    <div class="legend"><span class="dot free"></span>свободно <span class="dot pick"></span>ваш выбор <span class="dot busy"></span>занято</div>
+  </div>
+</section>
+
+<section class="info-grid">
+  <div class="panel"><h3>Время работы</h3><p class="big">{{ cfg.opening_time|time:"H:i" }}–{{ cfg.closing_time|time:"H:i" }}</p><p class="muted">Каждый день. Бронь возможна только в рабочие часы.</p></div>
+  <div class="panel"><h3>Адрес</h3><p class="big">Бишкек, ул. Игровая, 12</p><p class="muted">Вымышленный адрес для демонстрации.</p></div>
+  <div class="panel"><h3>В клубе</h3><p class="big">{{ total }} устройств</p><p class="muted">Компьютеры и консоли в обычной и VIP-зонах.</p></div>
+</section>
+
+{% if featured %}
+<section>
+  <h2>Сейчас в каталоге</h2>
+  <div class="cards">
+    {% for e in featured %}
+    <a class="card device" href="{% url 'equipment_detail' e.pk %}">
+      <span class="chip kind-{{ e.kind }}">{{ e.get_kind_display }}</span>
+      <h3>{{ e.name }}</h3>
+      <p class="muted">{{ e.zone }}</p>
+      <p class="price">{{ e.hourly_rate|floatformat:"-2" }} сом<small> / час</small></p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

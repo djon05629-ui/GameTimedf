@@ -1,0 +1,2 @@
+{% for e in form.non_field_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}
+{% for field in form %}{% include "partials/_field.html" %}{% endfor %}

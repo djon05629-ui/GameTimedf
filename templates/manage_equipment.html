@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Оборудование{% endblock %}
+{% block content %}
+<div class="head-row"><h1>Управление оборудованием</h1><a class="btn" href="{% url 'equipment_new' %}">Добавить устройство</a></div>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Название</th><th>Зона</th><th>Тип</th><th>Тариф</th><th>Статус</th><th></th></tr></thead>
+  <tbody>
+  {% for e in page %}
+  <tr>
+    <td>{{ e.name }}</td><td>{{ e.zone }}</td><td>{{ e.get_kind_display }}</td>
+    <td>{{ e.hourly_rate|floatformat:"-2" }} сом/ч</td>
+    <td>{% if e.is_active %}<span class="badge st-confirmed">Активно</span>{% else %}<span class="badge st-cancelled">Отключено</span>{% endif %}</td>
+    <td><a class="btn btn-ghost btn-sm" href="{% url 'equipment_edit' e.pk %}">Изменить</a></td>
+  </tr>
+  {% empty %}<tr><td colspan="6" class="muted">Устройств пока нет. Сначала добавьте зону, затем устройство.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% include "partials/_pagination.html" with extra="" %}
+<section class="panel narrow">
+  <h2>Новая зона</h2>
+  <form method="post" action="{% url 'zone_create' %}" class="inline-form">{% csrf_token %}
+    {% for field in zone_form %}{% include "partials/_field.html" %}{% endfor %}
+    <button class="btn">Добавить зону</button>
+  </form>
+</section>
+{% endblock %}

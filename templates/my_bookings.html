@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Мои брони{% endblock %}
+{% block content %}
+<h1>Мои брони</h1>
+<div class="tabs">
+  <a href="?tab=upcoming" class="{% if tab == 'upcoming' %}on{% endif %}">Предстоящие</a>
+  <a href="?tab=history" class="{% if tab == 'history' %}on{% endif %}">История</a>
+</div>
+{% if page %}
+<div class="list">
+  {% for b in page %}
+  <article class="row-card">
+    <div>
+      <h3>{{ b.equipment.name }} <small class="muted">{{ b.equipment.zone }}</small></h3>
+      <p>{{ b.start_at|date:"d E, l" }}, {{ b.start_at|time:"H:i" }}–{{ b.end_at|time:"H:i" }}</p>
+      <p class="muted">Тариф {{ b.rate_snapshot|floatformat:"-2" }} сом/час</p>
+    </div>
+    <div class="right">
+      <span class="badge st-{{ b.status }}">{{ b.get_status_display }}</span>
+      <p class="price">{{ b.total_price|floatformat:"-2" }} сом</p>
+      {% if b.status == "confirmed" and b.start_at > now %}
+      <form method="post" action="{% url 'booking_cancel' b.pk %}" data-confirm="Отменить бронь {{ b.equipment.name }} на {{ b.start_at|date:'d.m' }} в {{ b.start_at|time:'H:i' }}? Интервал освободится для других.">
+        {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="btn btn-ghost btn-sm">Отменить</button>
+      </form>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% include "partials/_pagination.html" with extra="tab="|add:tab %}
+{% else %}
+<div class="empty">
+  {% if tab == "upcoming" %}<h3>Предстоящих броней нет</h3><p>Выберите устройство и свободное время — бронь появится здесь.</p><a class="btn" href="{% url 'catalog' %}">Открыть каталог</a>
+  {% else %}<h3>История пока пуста</h3><p>Здесь появятся завершённые и отменённые брони.</p>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

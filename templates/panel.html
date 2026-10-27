@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Панель клуба{% endblock %}
+{% block content %}
+<div class="head-row">
+  <h1>Панель клуба</h1>
+  <div class="row">
+    <a class="btn btn-ghost btn-sm" href="{% url 'utilization' %}">Отчёт за период</a>
+    <a class="btn btn-ghost btn-sm" href="{% url 'manage_equipment' %}">Оборудование</a>
+    <a class="btn btn-ghost btn-sm" href="{% url 'club_settings' %}">Часы работы</a>
+    <a class="btn btn-ghost btn-sm" href="{% url 'manage_users' %}">Пользователи</a>
+  </div>
+</div>
+
+<form method="get" class="filters">
+  <a class="btn btn-ghost btn-sm" href="?date={{ prev|date:'Y-m-d' }}&status={{ status }}">← День</a>
+  <div class="field"><label for="p-date">Дата</label><input class="input" type="date" id="p-date" name="date" value="{{ day|date:'Y-m-d' }}"></div>
+  <a class="btn btn-ghost btn-sm" href="?date={{ next|date:'Y-m-d' }}&status={{ status }}">День →</a>
+  <div class="field"><label for="p-status">Статус</label>
+    <select class="input" id="p-status" name="status"><option value="">Все</option>
+      {% for v, l in statuses %}<option value="{{ v }}" {% if v == status %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select></div>
+  <button class="btn btn-sm">Применить</button>
+</form>
+
+<section class="panel">
+  <h2>Календарь дня</h2>
+  <div class="timeline">
+    <div class="tl-hours">{% for h in hours %}<span style="left: {{ h.left }}%">{{ h.label }}</span>{% endfor %}</div>
+    {% for lane in lanes %}
+    <div class="tl-row">
+      <div class="tl-name">{{ lane.e.name }}{% if not lane.e.is_active %} <small class="muted">(выкл.)</small>{% endif %}</div>
+      <div class="tl-track">
+        {% for bar in lane.bars %}
+        <span class="bar st-{{ bar.b.status }}" style="left: {{ bar.left }}%; width: {{ bar.width }}%" title="{{ bar.b.user.username }}, {{ bar.b.start_at|time:'H:i' }}–{{ bar.b.end_at|time:'H:i' }}">{{ bar.b.user.username }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<h2>Брони на {{ day|date:"j E" }}</h2>
+{% if bookings %}
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Время</th><th>Устройство</th><th>Клиент</th><th>Сумма</th><th>Статус</th><th>Действия</th></tr></thead>
+  <tbody>
+  {% for b in bookings %}
+  <tr>
+    <td>{{ b.start_at|time:"H:i" }}–{{ b.end_at|time:"H:i" }}</td>
+    <td>{{ b.equipment.name }}</td>
+    <td>{{ b.user.username }}</td>
+    <td>{{ b.total_price|floatformat:"-2" }} сом</td>
+    <td><span class="badge st-{{ b.status }}">{{ b.get_status_display }}</span></td>
+    <td class="actions">
+      {% if b.status == "confirmed" %}
+        {% if b.start_at <= now %}
+        <form method="post" action="{% url 'booking_start' b.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm">Начать</button></form>
+        <form method="post" action="{% url 'booking_no_show' b.pk %}" data-confirm="Отметить неявку клиента {{ b.user.username }}? Интервал освободится.">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-ghost btn-sm">Неявка</button></form>
+        {% else %}
+        <form method="post" action="{% url 'booking_cancel' b.pk %}" data-confirm="Отменить бронь клиента {{ b.user.username }}?">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-ghost btn-sm">Отменить</button></form>
+        {% endif %}
+      {% elif b.status == "in_progress" %}
+        <form method="post" action="{% url 'booking_finish' b.pk %}" data-confirm="Завершить сеанс? После этого бронь изменить нельзя.">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm">Завершить</button></form>
+      {% else %}<span class="muted">—</span>{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty"><h3>Броней нет</h3><p>На выбранный день с таким статусом ничего не найдено. Смените дату или сбросьте фильтр.</p></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Часы работы{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'panel' %}">← Панель клуба</a>
+<h1>Часы работы клуба</h1>
+<form method="post" class="panel narrow" novalidate>{% csrf_token %}
+  {% include "partials/_form.html" %}
+  <p class="muted small">Один интервал на каждый день, без перехода через полночь. Время кратно 30 минутам.</p>
+  <button class="btn">Сохранить настройки</button>
+</form>
+{% endblock %}

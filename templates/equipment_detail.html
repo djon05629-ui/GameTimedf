@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ e.name }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'catalog' %}">← Все устройства</a>
+<div class="detail">
+  <section class="panel">
+    <span class="chip kind-{{ e.kind }}">{{ e.get_kind_display }}</span>
+    <h1>{{ e.name }}</h1>
+    <p class="muted">{{ e.zone }}</p>
+    <h3>Характеристики</h3>
+    <p class="specs-full">{{ e.specs|default:"Характеристики пока не указаны."|linebreaksbr }}</p>
+    <p class="price big">{{ e.hourly_rate|floatformat:"-2" }} сом<small> / час</small></p>
+    <p class="muted">Клуб работает {{ cfg.opening_time|time:"H:i" }}–{{ cfg.closing_time|time:"H:i" }}. Шаг брони — 30 минут.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Выберите время</h2>
+    {% if not e.is_active %}
+      <div class="msg msg-warning">Устройство сейчас отключено и недоступно для брони.</div>
+    {% else %}
+    <div id="booker" data-slots-url="{% url 'equipment_slots' e.pk %}" data-rate="{{ e.hourly_rate }}">
+      <div class="field"><label for="b-date">Дата</label><input class="input" type="date" id="b-date" value="{{ day|date:'Y-m-d' }}"></div>
+      <div class="legend"><span class="dot free"></span>свободно <span class="dot pick"></span>выбрано <span class="dot busy"></span>занято</div>
+      <div id="slots" class="slots grid" aria-live="polite"><p class="muted">Загружаем расписание…</p></div>
+      <p class="muted small">Нажмите на начальный слот, затем на последний — выделится весь интервал.</p>
+      <div class="summary" id="summary">Интервал не выбран</div>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'booking_create' %}">
+        {% csrf_token %}
+        <input type="hidden" name="equipment" value="{{ e.pk }}">
+        <input type="hidden" name="date" id="f-date">
+        <input type="hidden" name="start" id="f-start">
+        <input type="hidden" name="end" id="f-end">
+        <button class="btn" id="book-btn" disabled>Забронировать</button>
+      </form>
+      {% else %}
+      <a class="btn" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Войдите, чтобы забронировать</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/booking.js' %}"></script>{% endblock %}

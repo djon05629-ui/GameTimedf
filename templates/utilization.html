@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Отчёт{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'panel' %}">← Панель клуба</a>
+<h1>Загрузка и выручка</h1>
+<form method="get" class="filters">
+  {% for field in form %}{% include "partials/_field.html" %}{% endfor %}
+  <button class="btn">Показать</button>
+</form>
+{% for e in form.non_field_errors %}<div class="msg msg-error">{{ e }}</div>{% endfor %}
+{% if report %}
+<div class="stats">
+  <div class="panel"><p class="big">{{ report.hours|floatformat:"-1" }} ч</p><p class="muted">занятых часов (без отмен и неявок)</p></div>
+  <div class="panel"><p class="big">{{ report.revenue|floatformat:"-2" }} сом</p><p class="muted">сумма завершённых сеансов</p></div>
+  <div class="panel"><p class="big">{{ report.finished }}</p><p class="muted">завершённых сеансов</p></div>
+</div>
+{% if report.rows %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Устройство</th><th>Часы</th><th>Выручка</th></tr></thead>
+  <tbody>{% for r in report.rows %}<tr><td>{{ r.equipment.name }}</td><td>{{ r.hours|floatformat:"-1" }}</td><td>{{ r.revenue|floatformat:"-2" }} сом</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty"><h3>За период броней нет</h3><p>Выберите другие даты.</p></div>{% endif %}
+{% endif %}
+{% endblock %}
